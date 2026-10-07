@@ -1,6 +1,8 @@
 import React from 'react'
 import Creditos from './Creditos'
 import Loading from './Loading'
+import Cartao from './Cartao'
+import MeuPonto from './MeuPonto'
 
 export default class App extends React.Component {
 
@@ -42,7 +44,13 @@ export default class App extends React.Component {
     if (this.state.latitude === null)
       return <Loading mensagem="Aguardando permissão de localização..." />
     return (
-      <p>Localização obtida: {this.state.latitude}, {this.state.longitude}</p>
+      <Cartao cabecalho="Você está aqui">
+        <MeuPonto
+          latitude={this.state.latitude}
+          longitude={this.state.longitude}
+          horarioLocalizacao={this.state.horarioLocalizacao}
+          onAtualizar={this.obterLocalizacao} />
+      </Cartao>
     )
   }
 
