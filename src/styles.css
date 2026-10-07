@@ -1,0 +1,19 @@
+.app {
+  max-width: 900px;
+  margin: auto;
+  padding: 12px;
+  background-color: #ffffc4;
+}
+
+.titulo {
+  text-align: center;
+  font-size: 2.5rem;
+  color: #774406;
+  font-family: cursive;
+}
+
+.rodape {
+  text-align: center;
+  color: #777;
+  margin-top: 24px;
+}
