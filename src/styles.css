@@ -2,18 +2,22 @@
   max-width: 900px;
   margin: auto;
   padding: 12px;
-  background-color: #ffffc4;
 }
 
 .titulo {
   text-align: center;
   font-size: 2.5rem;
-  color: #774406;
-  font-family: cursive;
+  color: #811aa7;
+  font-family: serif;
 }
 
 .rodape {
   text-align: center;
-  color: #777;
+  color: #00000070;
   margin-top: 24px;
+}
+
+body {
+  background-color: #f6e9ff;
+  margin: 0;
 }
