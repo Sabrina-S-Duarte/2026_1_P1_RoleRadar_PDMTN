@@ -3,6 +3,8 @@ import Creditos from './Creditos'
 import Loading from './Loading'
 import Cartao from './Cartao'
 import MeuPonto from './MeuPonto'
+import {Button} from '@primereact/ui/button'
+import geoapifyClient from '../utils/geoapifyClient'
 
 export default class App extends React.Component {
 
@@ -43,7 +45,8 @@ export default class App extends React.Component {
       return <p>{this.state.mensagemDeErro}</p>
     if (this.state.latitude === null)
       return <Loading mensagem="Aguardando permissão de localização..." />
-    return (
+      return (
+    <div>
       <Cartao cabecalho="Você está aqui">
         <MeuPonto
           latitude={this.state.latitude}
@@ -51,7 +54,14 @@ export default class App extends React.Component {
           horarioLocalizacao={this.state.horarioLocalizacao}
           onAtualizar={this.obterLocalizacao} />
       </Cartao>
-    )
+      <Button
+        type="button"
+        onClick={() => this.onBuscaRealizada('catering.cafe', 1000)}>
+        Testar busca
+      </Button>
+    </div>
+  )
+
   }
 
   render() {
@@ -68,4 +78,18 @@ export default class App extends React.Component {
       </div>
     )
   }
+
+  onBuscaRealizada = async (categoria, raio) => {
+  const { latitude, longitude } = this.state
+  const result = await geoapifyClient.get('/places', {
+    params: {
+      categories: categoria,
+      filter: `circle:${longitude},${latitude},${raio}`,
+      bias: `proximity:${longitude},${latitude}`,
+      limit: 20
+    }
+  })
+  console.log(result.data.features)
+}
+
 }
