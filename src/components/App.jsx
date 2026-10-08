@@ -6,6 +6,7 @@ import MeuPonto from './MeuPonto'
 import geoapifyClient from '../utils/geoapifyClient'
 import Busca from './Busca'
 import ListaLugares from './ListaLugares'
+import MapaRadar from './MapaRadar'
 
 export default class App extends React.Component {
 
@@ -14,7 +15,10 @@ export default class App extends React.Component {
     longitude: null,
     horarioLocalizacao: null,
     mensagemDeErro: null,
-    lugares: null
+    lugares: null,
+    buscando: false,
+    erroBusca: null,
+    raioBuscado: null
   }
 
   componentDidMount() {
@@ -92,24 +96,50 @@ renderizarConteudo = () => {
   }
 
   onBuscaRealizada = async (categoria, raio) => {
-  const { latitude, longitude } = this.state
-  const result = await geoapifyClient.get('/places', {
-    params: {
-      categories: categoria,
-      filter: `circle:${longitude},${latitude},${raio}`,
-      bias: `proximity:${longitude},${latitude}`,
-      limit: 20
+    const { latitude, longitude } = this.state
+    this.setState({ buscando: true, erroBusca: null, raioBuscado: raio })
+    try {
+      const result = await geoapifyClient.get('/places', {
+        params: {
+          categories: categoria,
+          filter: `circle:${longitude},${latitude},${raio}`,
+          bias: `proximity:${longitude},${latitude}`,
+          limit: 20
+        }
+      })
+      this.setState({ lugares: result.data.features, buscando: false })
+    } catch (erro) {
+      console.log(erro)
+      this.setState({
+        buscando: false,
+        erroBusca: 'Não foi possível consultar os lugares. Tente novamente.'
+      })
     }
-  })
-  this.setState({ lugares: result.data.features })
-}
+  }
 
   renderizarResultado = () => {
+    if (this.state.buscando)
+      return <Loading mensagem="Procurando lugares..." />
+    if (this.state.erroBusca)
+      return <p>{this.state.erroBusca}</p>
     if (this.state.lugares === null)
       return null
     if (this.state.lugares.length === 0)
       return <p>Nenhum lugar encontrado. Tente aumentar o raio.</p>
-    return <ListaLugares lugares={this.state.lugares} />
+    const total = this.state.lugares.length
+    const texto = total === 1 ? '1 lugar encontrado' : `${total} lugares encontrados`
+    return (
+      <div>
+        <p className="font-bold">{texto} em até {this.state.raioBuscado} m</p>
+        <Cartao cabecalho="Radar">
+          <MapaRadar
+            latitude={this.state.latitude}
+            longitude={this.state.longitude}
+            lugares={this.state.lugares} />
+        </Cartao>
+        <ListaLugares lugares={this.state.lugares} />
+      </div>
+    )
   }
 
 }
