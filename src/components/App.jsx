@@ -5,6 +5,7 @@ import Cartao from './Cartao'
 import MeuPonto from './MeuPonto'
 import geoapifyClient from '../utils/geoapifyClient'
 import Busca from './Busca'
+import ListaLugares from './ListaLugares'
 
 export default class App extends React.Component {
 
@@ -12,7 +13,8 @@ export default class App extends React.Component {
     latitude: null,
     longitude: null,
     horarioLocalizacao: null,
-    mensagemDeErro: null
+    mensagemDeErro: null,
+    lugares: null
   }
 
   componentDidMount() {
@@ -40,39 +42,51 @@ export default class App extends React.Component {
 
   obterAno = () => new Date().getFullYear()
 
-  renderizarConteudo = () => {
+renderizarConteudo = () => {
     if (this.state.mensagemDeErro)
       return <p>{this.state.mensagemDeErro}</p>
     if (this.state.latitude === null)
       return <Loading mensagem="Aguardando permissão de localização..." />
-      return (
-    <div>
-      <Cartao cabecalho="Você está aqui">
-        <MeuPonto
-          latitude={this.state.latitude}
-          longitude={this.state.longitude}
-          horarioLocalizacao={this.state.horarioLocalizacao}
-          onAtualizar={this.obterLocalizacao} />
-      </Cartao>
-      <Cartao cabecalho="O que você procura?">
-        <Busca onBuscaRealizada={this.onBuscaRealizada} />
-      </Cartao>
-    </div>
-  )
-
+    return (
+      <div className="grid">
+        <div className="col-12 md:col-6">
+          <Cartao cabecalho="Você está aqui">
+            <MeuPonto
+              latitude={this.state.latitude}
+              longitude={this.state.longitude}
+              horarioLocalizacao={this.state.horarioLocalizacao}
+              onAtualizar={this.obterLocalizacao} />
+          </Cartao>
+          <Cartao cabecalho="O que você procura?">
+            <Busca onBuscaRealizada={this.onBuscaRealizada} />
+          </Cartao>
+        </div>
+        <div className="col-12 md:col-6">
+          {this.renderizarResultado()}
+        </div>
+      </div>
+    )
   }
 
   render() {
-    const estiloSubtitulo = { textAlign: 'center', color: '#555', marginTop: 0 }
+    const estiloSubtitulo = { textAlign: 'center', color: '#555', marginTop: 0}
     return (
       <div className="app">
-        <h1 className="titulo">
-          <i className="pi pi-map-marker"></i> RolêRadar
-        </h1>
-        <p style={estiloSubtitulo}>Descubra o que existe perto de você</p>
-        <Creditos />
-        {this.renderizarConteudo()}
-        <footer className="rodape">RolêRadar © {this.obterAno()}</footer>
+        <div className="grid">
+          <div className="col-12">
+            <h1 className="titulo">
+              <i className="pi pi-map-marker"></i> RolêRadar
+            </h1>
+            <p style={estiloSubtitulo}>Descubra o que existe perto de você</p>
+            <Creditos />
+          </div>
+          <div className="col-12">
+            {this.renderizarConteudo()}
+          </div>
+          <div className="col-12">
+            <footer className="rodape">RolêRadar © {this.obterAno()}</footer>
+          </div>
+        </div>
       </div>
     )
   }
@@ -87,7 +101,15 @@ export default class App extends React.Component {
       limit: 20
     }
   })
-  console.log(result.data.features)
+  this.setState({ lugares: result.data.features })
 }
+
+  renderizarResultado = () => {
+    if (this.state.lugares === null)
+      return null
+    if (this.state.lugares.length === 0)
+      return <p>Nenhum lugar encontrado. Tente aumentar o raio.</p>
+    return <ListaLugares lugares={this.state.lugares} />
+  }
 
 }
